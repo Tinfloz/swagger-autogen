@@ -1,6 +1,7 @@
 {
   "name": "swagger-gen-auto",
-  "displayName": "swagger-gen-auto",
+  "displayName": "Swagger-Autogen",
+  "publisher": "Tinfloz",
   "description": "creates swagger files automatically",
   "version": "0.0.1",
   "engines": {

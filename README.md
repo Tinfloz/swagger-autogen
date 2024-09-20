@@ -1,71 +1,19 @@
-# swagger-gen-auto README
+# Welcome to Swagger-Autogen
 
-This is the README for your extension "swagger-gen-auto". After writing up a brief description, we recommend including the following sections.
 
-## Features
+## How to use the extension
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+Swagger-Autogen automatically generates swagger for Azure functions written in JavaScript and TypeScript from JS DocStrings like so:
 
-For example if there is an image subfolder under your extension project workspace:
+/**
+ * @method GET/POST/PUT/DELETE/PATCH 
+ * @query {"query1": "string", "query2": "number"}
+ * @path {"param":"boolean"}
+ * @request {"userName":"string", "privileges":"number:array"}
+ * @response200 {"success":"boolean"}
+ * @response400 {"success":"boolean"}
+ */
 
-\!\[feature X\]\(images/feature-x.png\)
+@response{statusCode} is how the extension understands what the response should be for different status codes
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+For array inputs, the syntax is -> {element-type}:array
