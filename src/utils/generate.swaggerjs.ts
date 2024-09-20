@@ -1,4 +1,4 @@
-import json2yaml from "json2yaml"
+ import json2yaml from "json2yaml";
 
 interface IExtractedDocStrings {
   tag: string;
@@ -14,6 +14,9 @@ interface TransformedObject {
   [key: string]: {
     type: string;
     description: string;
+    items?: {
+      type: string;
+    };
   };
 }
 
@@ -24,40 +27,64 @@ interface InputObject {
 const transformObject = (obj: InputObject): TransformedObject => {
   const result: TransformedObject = {};
   Object.keys(obj).forEach((key) => {
-    result[key] = {
-      type: obj[key],
-      description: "",
-    };
+    const value = obj[key];
+
+    // Detect 'type:array' format (e.g., string:array, object:array, number:array)
+    if (typeof value === "string" && value.includes(":array")) {
+      const [type] = value.split(":");
+      result[key] = {
+        type: "array",
+        description: "",
+        items: { type },
+      };
+    } else {
+      result[key] = {
+        type: value,
+        description: "",
+      };
+    }
   });
   return result;
 };
 
 const extractStatusCode = (tag: string): string => {
   const match = tag.match(/response(\d+)/);
-  return match ? match[1] : 'default';
+  return match ? match[1] : "default";
 };
 
 const cleanAndParseJson = (text: string): Record<string, any> => {
   try {
-    return JSON.parse(text.trim().replace(/(}|\])[^]*$/, '$1'));
+    // Clean the input by removing trailing non-JSON characters
+    return JSON.parse(text.trim().replace(/(}|\])[^]*$/, "$1"));
   } catch (e) {
     console.error("Error parsing JSON:", e);
     return {};
   }
 };
 
-export const genSwaggerJson = (url: string, methods: IMethods[], format:string) => {
+export const genSwaggerJson = (
+  url: string,
+  methods: IMethods[],
+  format: string
+) => {
   console.log("Input methods:", JSON.stringify(methods, null, 2));
   const paths: Record<string, any> = {};
 
   methods.forEach((el) => {
     console.log("\nProcessing route:", el.fn);
     const methodDoc = el.extractedDocStrings.find((doc) => doc.tag === "method");
-    const method = methodDoc ? (methodDoc.text as string).trim().split(' ')[0].toLowerCase() : '';
-    const pathParams = el.extractedDocStrings.find((doc) => doc.tag === "path")?.text;
-    const queryParams = el.extractedDocStrings.find((doc) => doc.tag === "query")?.text;
-    const request = el.extractedDocStrings.find((doc) => doc.tag === "request")?.text;
-    const responses: IExtractedDocStrings[] = el.extractedDocStrings.filter((doc) => doc.tag.startsWith("response"));
+    const method = methodDoc
+      ? (methodDoc.text as string).trim().split(" ")[0].toLowerCase()
+      : "";
+    const pathParams = el.extractedDocStrings.find((doc) => doc.tag === "path")
+      ?.text;
+    const queryParams = el.extractedDocStrings.find((doc) => doc.tag === "query")
+      ?.text;
+    const request = el.extractedDocStrings.find((doc) => doc.tag === "request")
+      ?.text;
+    const responses: IExtractedDocStrings[] = el.extractedDocStrings.filter((doc) =>
+      doc.tag.startsWith("response")
+    );
 
     console.log("Method:", method);
     console.log("Path params:", pathParams);
@@ -68,27 +95,27 @@ export const genSwaggerJson = (url: string, methods: IMethods[], format:string) 
     const parameters: any[] = [];
     let path = `/${el.fn}`;
 
-    if (pathParams && typeof pathParams === 'string') {
+    if (pathParams && typeof pathParams === "string") {
       const parsedPathParams = cleanAndParseJson(pathParams);
       Object.entries(parsedPathParams).forEach(([name, type]) => {
         path += `/{${name}}`;
         parameters.push({
           name,
-          in: 'path',
+          in: "path",
           required: true,
-          schema: { type }
+          schema: { type },
         });
       });
     }
 
-    if (queryParams && typeof queryParams === 'string') {
+    if (queryParams && typeof queryParams === "string") {
       const parsedQueryParams = cleanAndParseJson(queryParams);
       Object.entries(parsedQueryParams).forEach(([name, type]) => {
         parameters.push({
           name,
-          in: 'query',
-          required: false,
-          schema: { type }
+          in: "query",
+          required: true,
+          schema: { type },
         });
       });
     }
@@ -97,7 +124,7 @@ export const genSwaggerJson = (url: string, methods: IMethods[], format:string) 
     console.log("Updated path:", path);
 
     let requestBody: any = {};
-    if (method === 'post' && request && typeof request === 'string') {
+    if (method === "post" && request && typeof request === "string") {
       const parsedRequest = cleanAndParseJson(request);
       requestBody = {
         content: {
@@ -118,7 +145,7 @@ export const genSwaggerJson = (url: string, methods: IMethods[], format:string) 
       const statusCode = extractStatusCode(res.tag);
       let responseContent = {};
 
-      if (typeof res.text === 'string') {
+      if (typeof res.text === "string") {
         responseContent = cleanAndParseJson(res.text);
       }
 
@@ -175,8 +202,8 @@ export const genSwaggerJson = (url: string, methods: IMethods[], format:string) 
   };
 
   console.log("Final generated Swagger JSON:", JSON.stringify(result, null, 2));
-  if (format === "yaml"){
+  if (format === "yaml") {
     return json2yaml.stringify(result);
   }
   return result;
-};  
+};

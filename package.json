@@ -14,10 +14,27 @@
   "contributes": {
     "commands": [
       {
-        "command": "swagger-gen-auto.helloWorld",
+        "command": "swagger-gen-auto.genstart",
         "title": "gen start"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "swagger-gen-auto-sidebar",
+          "title": "Swagger Gen Auto",
+          "icon": "resources/file-exclamation-svgrepo-com.svg"
+        }
+      ]
+    },
+    "views": {
+      "swagger-gen-auto-sidebar": [
+        {
+          "id": "swaggerGenAutoView",
+          "name": "Swagger Gen"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

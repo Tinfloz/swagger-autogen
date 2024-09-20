@@ -3,17 +3,30 @@ import { getDocStrings } from './utils/code.parser';
 import { getFn } from './utils/get.fn';
 import { genSwaggerJson } from './utils/generate.swaggerjs';
 
+class SwaggerGenTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
+	getTreeItem(element: vscode.TreeItem): vscode.TreeItem {
+	  return element;
+	}
+  
+	getChildren(element?: vscode.TreeItem): Thenable<vscode.TreeItem[]> {
+	  const item = new vscode.TreeItem('Generate Swagger', vscode.TreeItemCollapsibleState.None);
+	  item.command = {
+		command: 'swagger-gen-auto.genstart',
+		title: 'gen start'
+	  };
+	  return Promise.resolve([item]);
+	}
+  }
+
 export function activate(context: vscode.ExtensionContext) {
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "swagger-gen-auto" is now active!');
-
+	const treeDataProvider = new SwaggerGenTreeDataProvider();
+	vscode.window.registerTreeDataProvider('swaggerGenAutoView', treeDataProvider);
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('swagger-gen-auto.helloWorld', async () => {
-		vscode.window.showInformationMessage('Hello World from swagger-gen-auto!');
+	const disposable = vscode.commands.registerCommand('swagger-gen-auto.genstart', async () => {
+		vscode.window.showInformationMessage('Swagger-autogen activated!');
 		const allVals:{
 			basePath:string
 			format:string,
@@ -70,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
 		// console.log(swagger);
         const filePath = vscode.Uri.joinPath(rootPath, `savefile.${allVals.format}`);
         const encoder = new TextEncoder();
-        const uint8Array = encoder.encode(JSON.stringify(swagger));
+        const uint8Array = encoder.encode(allVals.format === "json"?JSON.stringify(swagger):swagger as string);
         try {
             await vscode.workspace.fs.writeFile(filePath, uint8Array);
             vscode.window.showInformationMessage("Swagger saved successfully");
